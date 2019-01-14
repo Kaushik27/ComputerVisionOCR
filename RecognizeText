@@ -1,0 +1,50 @@
+package ComputerVisionOCR.ComputerVisionOCR;
+
+import java.net.URI;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+
+public class RecognizeText {
+
+	public String getOperationId(String subscriptionKey, String uriBase, String imageToAnalyze) {
+
+		CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+		try {
+			URIBuilder uriBuilder = new URIBuilder(uriBase);
+
+			// uriBuilder.setParameter("language", "unk");
+			// uriBuilder.setParameter("detectOrientation", "true");
+			uriBuilder.setParameter("mode", "Printed");
+
+			// Request parameters.
+			URI uri = uriBuilder.build();
+			HttpPost request = new HttpPost(uri);
+
+			// Request headers.
+			request.setHeader("Content-Type", "application/json");
+			request.setHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
+
+			// Request body.
+			StringEntity requestEntity = new StringEntity("{\"url\":\"" + imageToAnalyze + "\"}");
+			request.setEntity(requestEntity);
+
+			// Call the REST API method and get the response entity.
+			HttpResponse response = httpClient.execute(request);
+			// HttpEntity entity = response.getEntity();
+			if (response != null) {
+				String server = response.getFirstHeader("Operation-Location").getValue();
+				System.out.println(server.substring(server.lastIndexOf("/") + 1, server.length()));
+				return server.substring(server.lastIndexOf("/") + 1, server.length());
+			}
+		} catch (Exception e) {
+			// Display error message.
+			e.printStackTrace();
+		}
+		return null;
+	}
+}
